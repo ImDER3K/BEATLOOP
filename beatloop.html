@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BEATLOOP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bytesized&family=Coral+Pixels&display=swap');
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: black;
+        font-family: 'Arial', sans-serif;
+        padding: 20px;
+        color: #F5F5DC;
+    }
+
+    .container {
+        max-width: 800px;
+        width: 100%;
+    }
+
+    #startScreen {
+        text-align: center;
+        background: rgba(8, 12, 12, 0.95);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(15px);
+    }
+
+    #startScreen h1 {
+        font-size: 3em;
+        margin-bottom: 20px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        font-family: 'Coral Pixels', sans-serif;
+    }
+
+    .menu-tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        gap: 10px;
+    }
+
+    .tab-button {
+        background: rgba(102, 126, 234, 0.2);
+        border: 2px solid #00FF9A;
+        color: #00FF9A;
+        padding: 10px 20px;
+        border-radius: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .tab-button.active {
+        background: #00FF9A;
+        color: black;
+    }
+
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .music-library {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 2px solid #00FF9A;
+        border-radius: 15px;
+        padding: 15px;
+        background: rgba(15, 23, 23, 0.95);
+    }
+
+    .music-library::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    .music-library::-webkit-scrollbar-track {
+        background: rgba(15, 23, 23, 0.95);
+    }
+
+    .music-library::-webkit-scrollbar-thumb {
+        background: #00FF9A;
+        border-radius: 6px;
+    }
+
+    .music-library::-webkit-scrollbar-thumb:hover {
+        background: #00FF9A;
+    }
+
+    .song-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        margin: 10px 0;
+        background: rgba(15, 23, 23, 0.9);
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .song-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .song-info {
+        flex: 1;
+        text-align: left;
+    }
+
+    .song-title {
+        font-weight: bold;
+        color: #F5F5DC;
+        margin-bottom: 5px;
+    }
+
+    .song-details {
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .song-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .play-btn, .delete-btn {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .play-btn {
+        color: #4caf50;
+    }
+
+    .play-btn:hover {
+        background: rgba(76, 175, 80, 0.1);
+    }
+
+    .delete-btn {
+        color: #f44336;
+    }
+
+    .delete-btn:hover {
+        background: rgba(244, 67, 54, 0.1);
+    }
+
+    .upload-section {
+        background: rgba(102, 126, 234, 0.1);
+        border: 2px dashed #667eea;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .upload-section.dragover {
+        border-color: #764ba2;
+        background: rgba(118, 75, 162, 0.2);
+    }
+
+    #audioFile {
+        display: none;
+    }
+
+    .upload-btn {
+        background: #ADD8E6;
+        color: black;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .current-song {
+        background: rgba(76, 175, 80, 0.1);
+        border: 2px solid #4caf50;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .current-song h3 {
+        margin: 0 0 10px 0;
+        color: #4caf50;
+    }
+
+    .music-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .music-controls audio {
+        flex: 1;
+        max-width: 300px;
+        background: transparent;
+        border: none;
+    }
+
+    .custom-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .custom-controls button {
+        background: transparent;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        color: #00FF9A;
+    }
+
+    .custom-controls input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100px;
+        height: 5px;
+        background: #00FF9A;
+        outline: none;
+        border-radius: 5px;
+    }
+
+    .custom-controls input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        background: #00FF9A;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .shuffle-btn {
+        background: #122d27;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .shuffle-btn.active {
+        background: #0e1d2b;
+        box-shadow: 0 0 10px rgba(9, 18, 35, 0.5);
+    }
+
+    button {
+        background: linear-gradient(45deg, #0a0c12, #0d1c18);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    #micStatus {
+        margin: 15px 0;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+
+    .status-granted {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+    }
+
+    .status-denied {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+    }
+
+    canvas {
+        display: none;
+        border: 2px solid #333;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    #menuButton {
+        position: absolute;
+        top: 35%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+        font-family: 'Bytesized';
+        font-size: 20px;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #restartButton {
+        position: absolute;
+        top: 65%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 200;
+        font-family: 'Bytesized';
+        font-size: 20px;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .empty-library {
+        text-align: center;
+        color: #666;
+        padding: 40px;
+        font-style: italic;
+    }
+
+    #touchControls {
+      position: fixed;
+      bottom: 5vh;
+      right: 5vw;
+      display: none;
+      z-index: 1000;
+    }
+
+        #touchControls button {
+      width: 12vw;
+      height: 12vw;
+      background: transparent;
+      color: green;
+      border: none;
+      border-radius: 50%;
+      font-size: 6vw;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      max-width: 60px;
+      max-height: 60px;
+      box-shadow: none;
+    }
+
+    #touchControls button.flash {
+      text-shadow: 0 0 10px green;
+      animation: flash 0.2s ease-in-out;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; text-shadow: 0 0 5px green; }
+      50% { opacity: 0.7; text-shadow: 0 0 20px green; }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+
+        #startScreen {
+            padding: 20px;
+        }
+
+        #startScreen h1 {
+            font-size: 2em;
+        }
+
+        .menu-tabs {
+            flex-wrap: wrap;
+        }
+
+        .song-item {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .song-controls {
+            justify-content: center;
+        }
+
+        canvas {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            border-radius: 0;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body {
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
+            padding: 2vw;
+        }
+
+        #startScreen {
+            overflow-y: auto;
+            touch-action: pan-y;
+            max-height: 90vh;
+            padding: 5vw;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        h1 {
+            font-size: 8vw;
+        }
+
+        .tab-button {
+            min-height: 12vw;
+            padding: 2vw 4vw;
+        }
+
+        .music-controls {
+            flex-direction: column;
+        }
+
+        .menu-tabs {
+            gap: 3vw;
+        }
+
+        .song-item {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1vw;
+            margin: 1vw 0;
+            gap: 1vw;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .song-info {
+            width: 100%;
+            margin-bottom: 0.5vw;
+            font-size: 3.5vw;
+        }
+
+        .music-library {
+            max-height: 50vh;
+            padding: 2vw;
+            border-radius: 3vw;
+            border: 0.5vw solid #ddd;
+        }
+
+        .song-controls {
+            width: 100%;
+            justify-content: space-around;
+            gap: 2vw;
+        }
+
+        .song-item button {
+            padding: 2vw 4vw;
+            font-size: 4vw;
+            min-width: 20vw;
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 4.5vw;
+        }
+
+        #touchControls {
+            display: block;
+            bottom: 5vh;
+            top: auto;
+            right: 5vw;
+        }
+
+        #logoCanvas {
+            width: 15vw;
+            height: 15vw;
+            margin: 0 auto 2vh;
+        }
+
+        footer {
+            display: none;
+        }
+
+        #menuButton, #restartButton {
+            left: 50vw !important;
+            transform: translateX(-50%) !important;
+            width: 80vw;
+            text-align: center;
+            padding: 2vw;
+            font-size: 5vw;
+        }
+
+        #menuButton {
+            top: 40vh !important;
+        }
+
+        #restartButton {
+            top: 60vh !important;
+        }
+
+        #pauseBox h2 {
+            font-size: 40px;
+            color: #00ff9a !important;
+            font-family: 'Bytesized';
+            margin: 0 0 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #pauseBox {
+            background: none;
+            box-shadow: none;
+            text-align: center;
+        }
+
+        #pauseButtons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        #pauseButtons button {
+            width: 80vw;
+            padding: 2vw;
+            font-size: 5vw;
+            background: none;
+            border: none;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-family: 'Bytesized';
+        }
+    }
+  </style>
+  <style>
+    /* Pause overlay */
+    #pauseOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 500;
+    }
+    #pauseBox {
+        background: rgba(33, 33, 33, 0.95);
+        padding: 24px 28px;
+        border-radius: 16px;
+        text-align: center;
+        width: min(90vw, 360px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    #pauseBox h2 { margin: 0 0 10px 0; color: #333; }
+    #pauseButtons { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
+    #pauseButtons button { min-width: 140px; }
+    #countdownDisplay { font-size: 48px; font-weight: bold; color: #764ba2; margin-top: 8px; }
+    #resumeBtn { font-family: Arial; }
+
+    @media (min-width: 768px) {
+        #pauseOverlay {
+            background: none;
+        }
+        #pauseBox {
+            background: none;
+            box-shadow: none;
+            padding: 0;
+            border-radius: 0;
+            width: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #pauseBox h2 {
+            display: none;
+        }
+        #pauseButtons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        #pauseButtons button {
+            min-width: 140px;
+            font-family: 'Bytesized';
+        }
+
+        #touchControls {
+            display: none !important;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="startScreen">
+      <canvas id="logoCanvas" width="120" height="120" style="display: block; margin: 0 auto 10px; border: none; background: transparent; box-shadow: none;"></canvas>
+      <h1>BEATLOOP</h1>
+      
+      <div class="menu-tabs">
+        <button class="tab-button active" data-tab="play"><i class="fa-solid fa-gamepad"></i><br>Jugar</button>
+        <button class="tab-button" data-tab="library"><i class="fa-solid fa-file-audio"></i><br>Mi Música</button>
+        <button class="tab-button" data-tab="default"><i class="fa-solid fa-compact-disc"></i><br>Canciones</button>
+      </div>
+
+      <!-- Tab: Jugar -->
+      <div class="tab-content active" id="playTab">
+        <div class="current-song" id="currentSong">
+          <h3>Canción actual:</h3>
+          <div id="currentSongInfo">Ninguna seleccionada</div>
+          <div class="music-controls" id="musicControls" style="display: none;">
+            <audio id="audioPlayer"></audio>
+            <div class="custom-controls">
+              <button id="playBtn"><i class="fa-solid fa-play"></i></button>
+              <input type="range" id="progressBar" min="0" max="100" value="0">
+              <input type="range" id="volumeBar" min="0" max="1" step="0.1" value="1">
+            </div>
+            <button class="shuffle-btn" id="shuffleBtn">Aleatorio</button>
+          </div>
+        </div>
+        
+        <div id="micStatus"><i class="fa-solid fa-microphone"></i> Inicializando...</div>
+        <button id="startButton" disabled>¡Empezar a Jugar!</button>
+      </div>
+
+      <!-- Tab: Mi Música -->
+      <div class="tab-content" id="libraryTab">
+        <div class="upload-section" id="uploadSection">
+          <h3>📁 Agrega tu música</h3>
+          <p>Arrastra archivos aquí o haz clic para seleccionar</p>
+          <button class="upload-btn" onclick="document.getElementById('audioFile').click()">
+            Seleccionar archivos
+          </button>
+          <input type="file" id="audioFile" accept="audio/*" multiple />
+        </div>
+        
+        <div class="music-library">
+          <h3>🎵 Mi Biblioteca (<span id="libraryCount">0</span> canciones)</h3>
+          <div id="userLibrary"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Canciones Predeterminadas -->
+      <div class="tab-content" id="defaultTab">
+        <div class="music-library">
+          <h3>CANCIONES</h3>
+          <div id="defaultLibrary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <!-- Pause Overlay -->
+  <div id="pauseOverlay">
+    <div id="pauseBox">
+      <h2>PAUSA</h2>
+      <div id="countdownDisplay" style="display:none">3</div>
+      <div id="pauseButtons">
+        <button id="resumeBtn"><i class="fa-solid fa-play"></i> Salir de pausa</button>
+        <button id="menuBtn">Salir al menú</button>
+      </div>
+    </div>
+   </div>
+
+  <footer style="position: fixed; bottom: 0; left: 0; right: 0; background: black; color: white; opacity: 0.5; text-align: center; padding: 5px; font-size: 12px; font-family: 'Bytesized', monospace; z-index: 1000;">
+    Creado por Derek con ❤️
+  </footer>
+
+  <div id="touchControls">
+    <button id="pauseBtn"><i class="fa-solid fa-pause"></i></button>
+  </div>
+
+  <script>
+    // Music Management System
+    class MusicManager {
+        constructor() {
+            this.userLibrary = this.loadUserLibrary();
+            this.defaultSongs = this.initializeDefaultSongs();
+            this.currentSong = null;
+            this.shuffleMode = false;
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.analyser = this.audioContext.createAnalyser();
+            this.analyser.fftSize = 256;
+            this.mediaElementSource = null;
+            this.micSource = null;
+            this.micStream = null;
+            this.audioSource = null;
+            this.procInterval = null;
+        }
+
+        initializeDefaultSongs() {
+            return [
+                {
+                    id: 'default_1',
+                    title: 'SELEDA',
+                    artist: 'Alvaro Diaz',
+                    bpm: 95,
+                    duration: '3:12',
+                    type: 'default',
+                    url: 'https://www.dropbox.com/scl/fi/jse1g1ykufs2ct9hwtqts/Alvaro-Diaz-SELEDA-Official-Video.mp3?rlkey=8g6jgkjsfxrpjuo2ryws6js2q&st=3j1asxpc&dl=1'
+                },
+                {
+                    id: 'default_2',
+                    title: 'Energetic Beat',
+                    artist: 'Bici Runner',
+                    bpm: 128,
+                    duration: '3:20',
+                    type: 'default',
+                    url: null // Se generará proceduralmente
+                },
+                {
+                    id: 'default_3',
+                    title: 'Fast Lane',
+                    artist: 'Bici Runner',
+                    bpm: 140,
+                    duration: '2:45',
+                    type: 'default',
+                    url: null
+                },
+                {
+                    id: 'default_4',
+                    title: 'Chill Ride',
+                    artist: 'Bici Runner',
+                    bpm: 90,
+                    duration: '4:10',
+                    type: 'default',
+                    url: null
+                }
+            ];
+        }
+
+        loadUserLibrary() {
+            const saved = localStorage.getItem('bicirunner_music');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        saveUserLibrary() {
+            localStorage.setItem('bicirunner_music', JSON.stringify(this.userLibrary));
+        }
+
+        async addSong(file) {
+            const id = 'user_' + Date.now();
+            const title = file.name.replace(/\.[^/.]+$/, "");
+            // Save to IndexedDB
+            try {
+                await this.saveSongToDB({
+                    id,
+                    title,
+                    artist: 'Usuario',
+                    duration: 'Desconocida',
+                    type: 'user',
+                    blob: file
+                });
+            } catch (e) {
+                console.error('Error saving song to DB', e);
+            }
+
+            const song = {
+                id,
+                title,
+                artist: 'Usuario',
+                duration: 'Desconocida',
+                type: 'user',
+                url: URL.createObjectURL(file)
+            };
+            
+            this.userLibrary.push(song);
+            this.saveUserLibrary();
+            this.renderUserLibrary();
+            this.updateLibraryCount();
+        }
+
+        async removeSong(songId) {
+            const index = this.userLibrary.findIndex(s => s.id === songId);
+            if (index > -1) {
+                // Revoke object URL to free memory
+                if (this.userLibrary[index].url) {
+                    URL.revokeObjectURL(this.userLibrary[index].url);
+                }
+                // Delete from IndexedDB
+                try { await this.deleteSongFromDB(songId); } catch (e) { console.error('DB delete error', e); }
+                this.userLibrary.splice(index, 1);
+                this.saveUserLibrary();
+                this.renderUserLibrary();
+                this.updateLibraryCount();
+            }
+        }
+
+        getAllSongs() {
+            return [...this.defaultSongs, ...this.userLibrary];
+        }
+
+        selectRandomSong() {
+            const allSongs = this.getAllSongs();
+            if (allSongs.length === 0) return null;
+            
+            const randomIndex = Math.floor(Math.random() * allSongs.length);
+            return allSongs[randomIndex];
+        }
+
+        async selectSong(song) {
+            this.currentSong = song;
+            this.stopProceduralAudio();
+
+            // Stop current playback and reset before switching source to avoid AbortError
+            try { audioPlayer.pause(); } catch (e) {}
+            try { audioPlayer.currentTime = 0; } catch (e) {}
+            audioPlayer.src = '';
+            audioPlayer.load();
+
+            if (song.type === 'default' && song.url) {
+                // Use real URL for default songs with actual audio files
+                audioPlayer.src = song.url;
+                audioPlayer.load(); // Ensure the audio loads properly
+            } else if (song.type === 'default') {
+                // No procedural audio; this default song has no audio
+                    micStatus.innerHTML = '<i class="fa-solid fa-volume-high"></i> Esta canción predeterminada no tiene audio';
+                micStatus.className = 'status-denied';
+            } else {
+                // Use uploaded file
+                audioPlayer.src = song.url;
+                audioPlayer.load();
+            }
+
+            this.updateCurrentSongDisplay();
+            this.initAudioAnalysis();
+
+            // Add life on song change
+            lives += 1;
+            midSong = false;
+        }
+
+        async generateProceduralAudio(song) {
+            if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            this.startProceduralAudio(song.bpm);
+            bpm = song.bpm;
+        }
+
+        createProceduralTrack(bpm, duration) {
+            // Deprecated demo. Procedural audio implemented in startProceduralAudio
+            console.log(`Generated track with BPM: ${bpm} for ${duration} seconds`);
+        }
+
+        startProceduralAudio(targetBpm) {
+            this.stopProceduralAudio();
+            const interval = 60000 / targetBpm;
+            this.procInterval = setInterval(() => {
+                // Visual beat flag
+                beat = true;
+                setTimeout(() => beat = false, 80);
+                // Kick synth
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(120, this.audioContext.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, this.audioContext.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.0001, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.5, this.audioContext.currentTime + 0.005);
+                gain.gain.exponentialRampToValueAtTime(0.0001, this.audioContext.currentTime + 0.12);
+                osc.connect(gain);
+                // Connect to analyser and destination so it's audible and measurable
+                gain.connect(this.analyser);
+                gain.connect(this.audioContext.destination);
+                osc.start();
+                osc.stop(this.audioContext.currentTime + 0.15);
+            }, interval);
+        }
+
+        stopProceduralAudio() {
+            if (this.procInterval) {
+                clearInterval(this.procInterval);
+                this.procInterval = null;
+            }
+        }
+
+        async initAudioAnalysis() {
+            try {
+                // Reuse single AudioContext and nodes. Disconnect previous sources.
+                if (!this.audioContext) {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (!this.analyser) {
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.analyser.fftSize = 256;
+                }
+
+                // Disconnect existing sources
+                if (this.mediaElementSource) {
+                    try { this.mediaElementSource.disconnect(); } catch (e) {}
+                }
+                if (this.micSource) {
+                    try { this.micSource.disconnect(); } catch (e) {}
+                }
+                // Also disconnect analyser from any previous destination
+                try { this.analyser.disconnect(); } catch (e) {}
+
+                if (this.currentSong && (this.currentSong.type === 'user' || (this.currentSong.type === 'default' && this.currentSong.url))) {
+                    if (!this.mediaElementSource) {
+                        this.mediaElementSource = this.audioContext.createMediaElementSource(audioPlayer);
+                    }
+                    // Connect media element source to analyser and to destination so audio is audible
+                    this.mediaElementSource.connect(this.analyser);
+                    this.mediaElementSource.connect(this.audioContext.destination);
+                    this.audioSource = this.mediaElementSource;
+                    micStatus.textContent = `🎵 Analizando: ${this.currentSong.title}`;
+                    micStatus.className = 'status-granted';
+                } else if (this.currentSong && this.currentSong.type === 'default') {
+                    // No procedural audio; no source to analyze
+                    this.audioSource = null;
+                    micStatus.innerHTML = `<i class="fa-solid fa-volume-high"></i> Sin audio: ${this.currentSong.title}`;
+                    micStatus.className = 'status-denied';
+                } else {
+                    // Fallback to microphone
+                    if (!this.micStream) {
+                        this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    }
+                    if (!this.micSource) {
+                        this.micSource = this.audioContext.createMediaStreamSource(this.micStream);
+                    }
+                    this.micSource.connect(this.analyser);
+                    // Do not connect microphone to destination to avoid feedback
+                    this.audioSource = this.micSource;
+                    micStatus.innerHTML = '<i class="fa-solid fa-microphone"></i> Micrófono activo';
+                    micStatus.className = 'status-granted';
+                }
+
+                this.startAudioAnalysis();
+                micAccessGranted = true;
+                startButton.disabled = false;
+                
+            } catch (err) {
+                console.error('Error initializing audio:', err);
+                micAccessGranted = false;
+                startButton.disabled = true;
+                micStatus.textContent = '❌ Error al inicializar audio';
+                micStatus.className = 'status-denied';
+            }
+        }
+
+        simulateBPM(targetBPM) {
+            // Simulate BPM for procedural tracks
+            bpm = targetBPM;
+            
+            const beatInterval = 60000 / targetBPM; // ms per beat
+            
+            setInterval(() => {
+                beat = true;
+                setTimeout(() => beat = false, 100);
+            }, beatInterval);
+        }
+
+        startAudioAnalysis() {
+            if (!this.analyser) return;
+            
+            const freqData = new Uint8Array(this.analyser.frequencyBinCount);
+            const timeData = new Uint8Array(this.analyser.fftSize);
+            let lastBeatTime = 0;
+            let minBeatInterval = 150; // ms
+
+            // Adaptive baselines
+            let bassBaseline = 0;
+            let rmsBaseline = 0;
+            let initialized = false;
+            let prevBass = 0;
+            let prevRms = 0;
+
+            const analyze = () => {
+                // If audio está bloqueado o no hay fuente, no hay beats
+                if (audioLockedUntilRestart || !this.audioSource) {
+                    beat = false;
+                    requestAnimationFrame(analyze);
+                    return;
+                }
+
+                this.analyser.getByteFrequencyData(freqData);
+                this.analyser.getByteTimeDomainData(timeData);
+
+                // Bass energy (primer ~15% de bins)
+                const bassBins = Math.max(4, Math.floor(freqData.length * 0.15));
+                let bassSum = 0;
+                for (let i = 0; i < bassBins; i++) bassSum += freqData[i];
+                const bassAvg = bassSum / bassBins;
+
+                // Time-domain RMS
+                let sumSq = 0;
+                for (let i = 0; i < timeData.length; i++) {
+                    const v = (timeData[i] - 128) / 128; // [-1,1]
+                    sumSq += v * v;
+                }
+                const rms = Math.sqrt(sumSq / timeData.length);
+
+                if (!initialized) {
+                    bassBaseline = bassAvg;
+                    rmsBaseline = rms;
+                    initialized = true;
+                }
+                // EMA
+                bassBaseline = bassBaseline * 0.92 + bassAvg * 0.08;
+                rmsBaseline = rmsBaseline * 0.95 + rms * 0.05;
+
+                // Sensibilidades combinadas y control de subida
+                const sensBass = 1.12;
+                const sensRms = 1.20;
+                const risingBass = bassAvg > prevBass * 1.08;
+                const risingRms = rms > prevRms * 1.06;
+                const now = Date.now();
+
+                if (
+                    (bassAvg > bassBaseline * sensBass && risingBass ||
+                     rms > rmsBaseline * sensRms && risingRms) &&
+                    (now - lastBeatTime) > minBeatInterval
+                ) {
+                    beat = true;
+                    bassDetected = true;
+                    buttonFlash = 10;
+                    songFlash = 10;
+                    beats++;
+                    lastBeatTime = now;
+                } else {
+                    beat = false;
+                }
+
+                // Velocidad basada en loudness global
+                let total = 0;
+                for (let i = 0; i < freqData.length; i++) total += freqData[i];
+                const avg = total / freqData.length;
+                audioSpeedFactor = Math.min(Math.max(avg / 25, 0), 10);
+
+                if (now - bpmUpdateTime > 1000) {
+                    bpm = Math.round(beats * 60);
+                    beats = 0;
+                    bpmUpdateTime = now;
+                }
+
+                prevBass = bassAvg;
+                prevRms = rms;
+                requestAnimationFrame(analyze);
+            };
+            
+            analyze();
+        }
+
+        updateCurrentSongDisplay() {
+            const currentSongInfo = document.getElementById('currentSongInfo');
+            const musicControls = document.getElementById('musicControls');
+            
+            if (this.currentSong) {
+                currentSongInfo.innerHTML = `
+                    <strong>${this.currentSong.title}</strong><br>
+                    <small>${this.currentSong.artist} ${this.currentSong.bpm ? `• ${this.currentSong.bpm} BPM` : ''}</small>
+                `;
+                
+                if (this.currentSong.url) {
+                    musicControls.style.display = 'flex';
+                } else {
+                    musicControls.style.display = 'none';
+                }
+            } else {
+                currentSongInfo.textContent = 'Ninguna seleccionada';
+                musicControls.style.display = 'none';
+            }
+        }
+
+        renderUserLibrary() {
+            const container = document.getElementById('userLibrary');
+            
+            if (this.userLibrary.length === 0) {
+                container.innerHTML = '<div class="empty-library">📭 No hay canciones en tu biblioteca</div>';
+                return;
+            }
+
+            container.innerHTML = this.userLibrary.map(song => `
+                <div class="song-item">
+                    <div class="song-info">
+                        <div class="song-title">🎵 ${song.title}</div>
+                        <div class="song-details">${song.artist} • ${song.duration}</div>
+                    </div>
+                    <div class="song-controls">
+                        <button class="play-btn" onclick="selectAndPlaySong('${song.id}', 'user')" title="Seleccionar y reproducir">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                         <button class="delete-btn" onclick="musicManager.removeSong('${song.id}')" title="Eliminar">
+                             <i class="fa-solid fa-x"></i>
+                         </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        renderDefaultLibrary() {
+            const container = document.getElementById('defaultLibrary');
+            
+            container.innerHTML = this.defaultSongs.map(song => `
+                <div class="song-item">
+                    <div class="song-info">
+            <div class="song-title"><i class="fa-solid fa-volume-high"></i> ${song.title}</div>
+                        <div class="song-details">${song.artist} • ${song.bpm} BPM • ${song.duration}</div>
+                    </div>
+                    <div class="song-controls">
+                        <button class="play-btn" onclick="selectAndPlaySong('${song.id}', 'default')" title="Seleccionar y reproducir">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        updateLibraryCount() {
+            document.getElementById('libraryCount').textContent = this.userLibrary.length;
+        }
+
+        // IndexedDB helpers
+        openDB() {
+            if (this.db) return Promise.resolve(this.db);
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('bicirunner_db', 1);
+                request.onupgradeneeded = () => {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains('songs')) {
+                        db.createObjectStore('songs', { keyPath: 'id' });
+                    }
+                };
+                request.onsuccess = () => { this.db = request.result; resolve(this.db); };
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async saveSongToDB(record) {
+            const db = await this.openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('songs', 'readwrite');
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+                const store = tx.objectStore('songs');
+                store.put(record);
+            });
+        }
+
+        async getAllSongsFromDB() {
+            const db = await this.openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('songs', 'readonly');
+                const store = tx.objectStore('songs');
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async deleteSongFromDB(id) {
+            const db = await this.openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('songs', 'readwrite');
+                const store = tx.objectStore('songs');
+                const req = store.delete(id);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async initFromDB() {
+            try {
+                const records = await this.getAllSongsFromDB();
+                // Revoke existing URLs to avoid leaks
+                this.userLibrary.forEach(s => { try { if (s.url) URL.revokeObjectURL(s.url); } catch (e) {} });
+                this.userLibrary = records.map(r => ({
+                    id: r.id,
+                    title: r.title,
+                    artist: r.artist || 'Usuario',
+                    duration: r.duration || 'Desconocida',
+                    type: 'user',
+                    url: URL.createObjectURL(r.blob)
+                }));
+            } catch (e) {
+                console.error('Error loading songs from DB', e);
+            }
+        }
+    }
+
+    // Initialize music manager
+    const musicManager = new MusicManager();
+
+    // Audio analysis variables
+    let audioSpeedFactor = 0;
+    let bpm = 0;
+    let beat = false;
+    let beats = 0;
+    let bpmUpdateTime = Date.now();
+
+    // Game variables
+    let gameStarted = false;
+    let micAccessGranted = false;
+    let audioLockedUntilRestart = false;
+    let gameOverHandled = false;
+    let isPaused = false;
+    let audioWasPlayingBeforePause = false;
+    let countdownTimer = null;
+
+    // HTML Elements
+    const audioPlayer = document.getElementById('audioPlayer');
+    audioPlayer.crossOrigin = 'anonymous';
+    const micStatus = document.getElementById('micStatus');
+    const startButton = document.getElementById('startButton');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+
+    // Pause overlay elements
+    const pauseOverlay = document.getElementById('pauseOverlay');
+    const resumeBtn = document.getElementById('resumeBtn');
+    const menuBtn = document.getElementById('menuBtn');
+    const countdownDisplay = document.getElementById('countdownDisplay');
+
+    // Utility: wait until the audio element can play to avoid play() being interrupted by load
+    function waitForCanPlay(el) {
+        return new Promise(resolve => {
+            if (el.readyState >= 3) {
+                resolve();
+            } else {
+                el.addEventListener('canplay', () => resolve(), { once: true });
+            }
+        });
+    }
+
+    // Play next track preferring user's library; fallback to a default with URL if empty
+    async function playNextFromUserOrDefault() {
+        const lib = musicManager.userLibrary || [];
+        let next = null;
+
+        if (lib.length > 0) {
+            if (musicManager.shuffleMode) {
+                // Random from user's library; avoid repeating current if possible
+                if (lib.length === 1) {
+                    next = lib[0];
+                } else {
+                    const candidates = lib.filter(s => !musicManager.currentSong || s.id !== musicManager.currentSong.id);
+                    next = candidates[Math.floor(Math.random() * candidates.length)];
+                }
+            } else {
+                // Sequential inside user's library with wrap-around
+                let idx = -1;
+                if (musicManager.currentSong && musicManager.currentSong.type === 'user') {
+                    idx = lib.findIndex(s => s.id === musicManager.currentSong.id);
+                }
+                const nextIndex = idx >= 0 ? (idx + 1) % lib.length : 0;
+                next = lib[nextIndex];
+            }
+        } else {
+            // Fallback: pick a default song that has a real URL
+            const defaultsWithUrl = (musicManager.defaultSongs || []).filter(s => !!s.url);
+            if (defaultsWithUrl.length > 0) {
+                if (musicManager.shuffleMode && defaultsWithUrl.length > 1) {
+                    const candidates = defaultsWithUrl.filter(s => !musicManager.currentSong || s.id !== musicManager.currentSong.id);
+                    next = candidates[Math.floor(Math.random() * candidates.length)];
+                } else {
+                    next = defaultsWithUrl[0];
+                }
+            }
+        }
+
+        if (next) {
+            await musicManager.selectSong(next);
+            try {
+                await waitForCanPlay(audioPlayer);
+                await audioPlayer.play();
+            } catch (err) {
+                console.log('Autoplay blocked when advancing to next track:', err);
+            }
+        } else {
+            micStatus.textContent = '📭 No hay más canciones. Agrega música para continuar';
+            micStatus.className = 'status-denied';
+        }
+    }
+
+    // Audio player event listeners
+    audioPlayer.addEventListener('error', () => {
+        const error = audioPlayer.error;
+        if (error && error.code === MediaError.MEDIA_ERR_NETWORK) {
+            micStatus.textContent = '❌ Error CORS: Verifica el enlace o usa local';
+        } else {
+            micStatus.textContent = '❌ Error al cargar audio';
+        }
+        micStatus.className = 'status-denied';
+    });
+
+    audioPlayer.addEventListener('loadstart', () => {
+        micStatus.textContent = '🔄 Cargando audio...';
+        micStatus.className = '';
+    });
+
+    audioPlayer.addEventListener('canplay', () => {
+        micStatus.textContent = '✅ Audio listo – Haz clic para reproducir';
+        micStatus.className = 'status-granted';
+    });
+
+    audioPlayer.addEventListener('play', () => {
+        if (audioLockedUntilRestart) {
+            audioPlayer.pause();
+            micStatus.textContent = '⏹️ Juego terminado. Reinicia para volver a oír la música';
+            micStatus.className = 'status-denied';
+            return;
+        }
+        const title = musicManager.currentSong ? musicManager.currentSong.title : 'Canción';
+        micStatus.textContent = `🎵 Reproduciendo: ${title}`;
+        micStatus.className = 'status-granted';
+    });
+
+    // Global click listener to resume AudioContext
+    document.addEventListener('click', () => {
+        if (musicManager.audioContext && musicManager.audioContext.state === 'suspended') {
+            musicManager.audioContext.resume();
+        }
+    }, { once: true });
+
+    // Tab system
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.tab;
+            
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Update active tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        });
+    });
+
+    // File upload handling
+    const audioFileInput = document.getElementById('audioFile');
+    const uploadSection = document.getElementById('uploadSection');
+
+    audioFileInput.addEventListener('change', (e) => {
+        Array.from(e.target.files).forEach(file => {
+            if (file.type.startsWith('audio/')) {
+                musicManager.addSong(file);
+            }
+        });
+        e.target.value = ''; // Reset input
+    });
+
+    // Drag and drop
+    uploadSection.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadSection.classList.add('dragover');
+    });
+
+    uploadSection.addEventListener('dragleave', () => {
+        uploadSection.classList.remove('dragover');
+    });
+
+    uploadSection.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadSection.classList.remove('dragover');
+        
+        Array.from(e.dataTransfer.files).forEach(file => {
+            if (file.type.startsWith('audio/')) {
+                musicManager.addSong(file);
+            }
+        });
+    });
+
+    // Shuffle button
+    shuffleBtn.addEventListener('click', () => {
+        musicManager.shuffleMode = !musicManager.shuffleMode;
+        shuffleBtn.classList.toggle('active');
+
+        if (musicManager.shuffleMode) {
+            const randomSong = musicManager.selectRandomSong();
+            if (randomSong) {
+                musicManager.selectSong(randomSong);
+            }
+        }
+    });
+
+    // Custom audio controls
+    const playBtn = document.getElementById('playBtn');
+    const progressBar = document.getElementById('progressBar');
+    const volumeBar = document.getElementById('volumeBar');
+
+    playBtn.addEventListener('click', () => {
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+            playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        } else {
+            audioPlayer.pause();
+            playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        }
+    });
+
+    audioPlayer.addEventListener('timeupdate', () => {
+        const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        progressBar.value = progress;
+    });
+
+    progressBar.addEventListener('input', () => {
+        const time = (progressBar.value / 100) * audioPlayer.duration;
+        audioPlayer.currentTime = time;
+    });
+
+    volumeBar.addEventListener('input', () => {
+        audioPlayer.volume = volumeBar.value;
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+        playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    });
+
+    // Initialize
+                    micStatus.innerHTML = '<i class="fa-solid fa-microphone"></i> Permite acceso al micrófono o selecciona una canción';
+    musicManager.initFromDB().then(() => {
+        musicManager.renderUserLibrary();
+        musicManager.updateLibraryCount();
+    });
+    musicManager.renderDefaultLibrary();
+
+    // Try to initialize microphone as fallback
+    musicManager.initAudioAnalysis().catch(() => {
+        micStatus.textContent = '⚠️ Selecciona una canción para empezar';
+        micStatus.className = 'status-denied';
+    });
+
+    // Game code (rest of the game logic remains the same)
+    const startScreen = document.getElementById('startScreen');
+    const menuButton = document.createElement('button');
+    menuButton.id = 'menuButton';
+    menuButton.textContent = 'VOLVER AL MENÚ';
+    menuButton.style.display = 'none';
+    document.body.appendChild(menuButton);
+
+    const restartButton = document.createElement('button');
+    restartButton.id = 'restartButton';
+    restartButton.textContent = 'VOLVER A JUGAR';
+    restartButton.style.display = 'none';
+    document.body.appendChild(restartButton);
+
+    menuButton.addEventListener('click', () => {
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+        gameStarted = false;
+        gameOver = false;
+        gameOverHandled = false;
+        audioLockedUntilRestart = false;
+        losing = false;
+        shake = 0;
+        player.x = 0;
+        player.z = 0;
+        player.jumpHeight = 0;
+        player.beatFlash = 0;
+        obstacles = [];
+        score = 0;
+        lives = 0;
+        midSong = false;
+        bpm = 0;
+        beats = 0;
+        bpmUpdateTime = Date.now();
+        menuButton.style.display = 'none';
+        restartButton.style.display = 'none';
+        if (window.innerWidth < 768) {
+            pauseBtn.style.display = 'none';
+            document.getElementById('touchControls').style.display = 'none';
+        }
+        startScreen.style.display = 'block';
+        canvas.style.display = 'none';
+        // Resume audio if paused
+        try {
+            if (musicManager.audioContext && musicManager.audioContext.state === 'suspended') {
+                musicManager.audioContext.resume();
+            }
+        } catch (e) {}
+    });
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const CANVAS_WIDTH = 400;
+    const CANVAS_HEIGHT = 600;
+
+    // 3D constants
+    const ROAD_WIDTH = 200;
+    const FOCAL_LENGTH = 200;
+    const ROAD_LENGTH = 1000;
+    const CAMERA_DISTANCE = 100;
+    let bgNormal = new Image();
+    bgNormal.src = 'https://i.postimg.cc/hGdx1cvp/Chat-GPT-Image-26-sept-2025-00-15-06.png';
+    let bgBass = new Image();
+    bgBass.src = 'https://i.postimg.cc/ZKsdkCyw/Chat-GPT-Image-26-sept-2025-00-15-01.png';
+    let currentBg = bgNormal;
+    let shake = 0;
+    let bassDetected = false;
+    let buttonFlash = 0;
+    let songFlash = 0;
+    let PLAYER_SPEED = 5;
+    const PLAYER_MOVE_SPEED = 6;
+
+    // Obstacle types configuration (ready for future sprite skins)
+    const OBSTACLE_TYPES = {
+        car:   { color: 'red',       width: 22, height: 44 },   // (rojo) carros
+        moto:  { color: 'yellow',    width: 12, height: 28 },   // (amarillo) motos
+        bus:   { color: 'deeppink',  width: 32, height: 64 }    // (rosado) buses
+    };
+
+    function pickObstacleType() {
+        const types = Object.keys(OBSTACLE_TYPES);
+        return types[Math.floor(Math.random() * types.length)];
+    }
+
+    // Player object
+    let player = {
+        x: 0,
+        z: 0,
+        width: 20,
+        color: '#00FF9A',
+        jumpHeight: 0,
+        beatFlash: 0,
+        baseY: CANVAS_HEIGHT - 30
+    };
+
+    // Game state
+    let obstacles = [];
+    let spawnRate = 0.04;
+    let score = 0;
+    let highScore = 0;
+    let gameOver = false;
+    let losing = false;
+    let lives = 0;
+    let midSong = false;
+    let lifeAngle = 0;
+    let animationId = null;
+
+    // Input handling
+    let keys = {};
+    document.addEventListener('keydown', (e) => {
+        keys[e.code] = true;
+    });
+    // ESC to toggle pause
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Escape' && gameStarted && !gameOver) {
+            if (!isPaused) {
+                pauseGame();
+            } else {
+                resumeGameWithCountdown();
+            }
+        }
+    });
+    document.addEventListener('keyup', (e) => {
+        keys[e.code] = false;
+    });
+
+    startButton.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        canvas.style.display = 'block';
+        gameStarted = true;
+        if (window.innerWidth < 768) {
+            pauseBtn.style.display = 'block';
+            document.getElementById('touchControls').style.display = 'block';
+        }
+        restartButton.style.display = 'none';
+
+        if (musicManager.audioContext && musicManager.audioContext.state === 'suspended') {
+            musicManager.audioContext.resume();
+        }
+        
+        // Auto-play current song if it has a URL (real audio file)
+        if (musicManager.currentSong && musicManager.currentSong.url) {
+            waitForCanPlay(audioPlayer).then(() => {
+                audioPlayer.play().catch(err => {
+                    console.log('Autoplay blocked by browser:', err);
+                    // Show message to user about playing manually
+                    micStatus.innerHTML = '<i class="fa-solid fa-play"></i> Presiona play en los controles de audio';
+                    micStatus.className = 'status-denied';
+                });
+            });
+        }
+        
+        if (musicManager.shuffleMode && !musicManager.currentSong) {
+            const randomSong = musicManager.selectRandomSong();
+            if (randomSong) {
+                musicManager.selectSong(randomSong);
+                // Try to autoplay the random song too
+                if (randomSong.url) {
+                    setTimeout(() => {
+                        audioPlayer.play().catch(err => console.log('Autoplay blocked:', err));
+                    }, 500);
+                }
+            }
+        }
+        
+        gameLoop();
+    });
+
+    restartButton.addEventListener('click', () => {
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+        
+        player.x = 0;
+        player.z = 0;
+        player.jumpHeight = 0;
+        player.beatFlash = 0;
+        obstacles = [];
+        score = 0;
+        gameOver = false;
+        gameOverHandled = false;
+        audioLockedUntilRestart = false;
+        bpm = 0;
+        beats = 0;
+        bpmUpdateTime = Date.now();
+        restartButton.style.display = 'none';
+        if (window.innerWidth < 768) {
+            pauseBtn.style.display = 'block';
+            document.getElementById('touchControls').style.display = 'block';
+        }
+
+        try {
+            if (musicManager.audioContext && musicManager.audioContext.state === 'suspended') {
+                musicManager.audioContext.resume();
+            }
+            audioPlayer.playbackRate = 1;
+            audioPlayer.volume = 1;
+            audioPlayer.currentTime = 0;
+        } catch (e) {}
+        
+        // If shuffle mode is on, select new random song
+        if (musicManager.shuffleMode) {
+            const nextSong = musicManager.selectRandomSong();
+            if (nextSong && nextSong.id !== musicManager.currentSong?.id) {
+                musicManager.selectSong(nextSong);
+                if (nextSong.url) {
+                    setTimeout(() => {
+                        audioPlayer.play().catch(err => console.log('Autoplay blocked:', err));
+                    }, 300);
+                }
+            }
+        } else {
+            // Restart current song from the beginning
+            if (musicManager.currentSong && musicManager.currentSong.url) {
+                try { audioPlayer.pause(); } catch (e) {}
+                audioPlayer.src = musicManager.currentSong.url;
+                audioPlayer.currentTime = 0;
+                audioPlayer.load();
+                waitForCanPlay(audioPlayer).then(() => {
+                    audioPlayer.play().catch(err => console.log('Autoplay blocked:', err));
+                });
+            }
+        }
+        
+        gameLoop();
+    });
+
+    function gameLoop() {
+        update();
+        draw();
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function pauseGame() {
+        if (isPaused) return;
+        isPaused = true;
+        if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+        // Pause audio and remember state
+        try { audioWasPlayingBeforePause = !audioPlayer.paused; } catch (e) { audioWasPlayingBeforePause = false; }
+        try { if (audioWasPlayingBeforePause) audioPlayer.pause(); } catch (e) {}
+        // Show overlay
+        countdownDisplay.style.display = 'none';
+        document.getElementById('pauseButtons').style.display = 'flex';
+        pauseOverlay.style.display = 'flex';
+    }
+
+    function resumeGameWithCountdown() {
+        if (!isPaused) return;
+        // Prepare countdown UI
+        document.getElementById('pauseButtons').style.display = 'none';
+        countdownDisplay.style.display = 'block';
+        let remaining = 3;
+        countdownDisplay.textContent = remaining;
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        countdownTimer = setInterval(() => {
+            remaining -= 1;
+            if (remaining <= 0) {
+                clearInterval(countdownTimer); countdownTimer = null;
+                pauseOverlay.style.display = 'none';
+                isPaused = false;
+                // Resume audio if it was playing before pause
+                if (audioWasPlayingBeforePause) {
+                    try { audioPlayer.play(); } catch (e) {}
+                }
+                if (musicManager.audioContext && musicManager.audioContext.state === 'suspended') {
+                    musicManager.audioContext.resume().catch(() => {});
+                }
+                gameLoop();
+            } else {
+                countdownDisplay.textContent = remaining;
+            }
+        }, 1000);
+    }
+
+    function exitToMenu() {
+        // Stop timers and overlay
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        pauseOverlay.style.display = 'none';
+        isPaused = false;
+        // Stop loop
+        if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+        // Pause audio
+        try { audioPlayer.pause(); } catch (e) {}
+        // UI: show menu, hide game
+        if (window.innerWidth < 768) {
+            pauseBtn.style.display = 'none';
+            document.getElementById('touchControls').style.display = 'none';
+        }
+        document.getElementById('startScreen').style.display = 'block';
+        document.getElementById('gameCanvas').style.display = 'none';
+        menuButton.style.display = 'none';
+        restartButton.style.display = 'none';
+        gameStarted = false;
+    }
+
+    // Pause overlay buttons
+    resumeBtn.addEventListener('click', resumeGameWithCountdown);
+    menuBtn.addEventListener('click', exitToMenu);
+
+    function update() {
+        if (!gameStarted || gameOver || isPaused) return;
+
+        if (bassDetected) {
+            currentBg = bgBass;
+            if (shake === 0) shake = 10;
+            bassDetected = false;
+        } else {
+            currentBg = bgNormal;
+        }
+        if (shake > 0 && !losing) shake--;
+        if (losing) shake--;
+
+        if (buttonFlash > 0) {
+            buttonFlash--;
+            pauseBtn.classList.add('flash');
+        } else {
+            pauseBtn.classList.remove('flash');
+        }
+
+        // Tiered speed by BPM
+        if (bpm > 325) {
+            PLAYER_SPEED = 7;
+        } else if (bpm >= 100 && bpm <= 225) {
+            PLAYER_SPEED = 3;
+        } else {
+            PLAYER_SPEED = 5;
+        }
+
+        if (!losing) {
+            if (keys['ArrowLeft'] && player.x > -ROAD_WIDTH / 2 + 20) {
+                player.x -= PLAYER_MOVE_SPEED;
+            }
+            if (keys['ArrowRight'] && player.x < ROAD_WIDTH / 2 - 20) {
+                player.x += PLAYER_MOVE_SPEED;
+            }
+
+            player.z += PLAYER_SPEED;
+
+            obstacles.forEach(ob => {
+                ob.speed = Math.max(1, PLAYER_SPEED - 2);
+                ob.z -= ob.speed;
+                if (ob.flash > 0) ob.flash--;
+            });
+
+            if (beat) {
+                obstacles.forEach(ob => ob.flash = 10);
+                player.jumpHeight = 15;
+                player.beatFlash = 8;
+            }
+            
+            if (player.jumpHeight > 0) {
+                player.jumpHeight -= 1;
+            }
+            
+            if (player.beatFlash > 0) {
+                player.beatFlash--;
+            }
+
+            obstacles = obstacles.filter(ob => ob.z > player.z - 50);
+
+            if (Math.random() < spawnRate) {
+                let x = (Math.random() - 0.5) * ROAD_WIDTH;
+                let z = player.z + 500 + Math.random() * 500;
+                let obstacleSpeed = Math.max(1, PLAYER_SPEED - 2);
+                const type = pickObstacleType();
+                const cfg = OBSTACLE_TYPES[type];
+                obstacles.push({
+                    x,
+                    z,
+                    type,
+                    width: cfg.width,
+                    baseHeight: cfg.height,
+                    color: cfg.color,
+                    speed: obstacleSpeed,
+                    flash: 0,
+                    skin: null
+                });
+            }
+
+            // Spawn power-ups
+            if (Math.random() < 0.005) {
+                let x = (Math.random() - 0.5) * ROAD_WIDTH;
+                let z = player.z + 500 + Math.random() * 500;
+                obstacles.push({
+                    x,
+                    z,
+                    type: 'powerup',
+                    width: 20,
+                    baseHeight: 20,
+                    color: 'green',
+                    speed: 0,
+                    flash: 0
+                });
+            }
+
+
+
+
+        } else {
+            // During losing, continue moving obstacles and player forward for effect, but no input or spawning
+            player.z += PLAYER_SPEED;
+            obstacles.forEach(ob => {
+                ob.z -= ob.speed;
+                if (ob.flash > 0) ob.flash--;
+            });
+            obstacles = obstacles.filter(ob => ob.z > player.z - 50);
+        }
+
+        // Collision detection
+        obstacles.forEach(ob => {
+            let worldZ = ob.z - (player.z - CAMERA_DISTANCE);
+            if (worldZ <= 0) return;
+            let scale = FOCAL_LENGTH / worldZ;
+            let screenX = CANVAS_WIDTH / 2 + (ob.x - player.x) * scale;
+            let screenY = CANVAS_HEIGHT - ((ob.z - player.z) / ROAD_LENGTH) * CANVAS_HEIGHT;
+            let width = ob.width * scale;
+            let height = (ob.baseHeight || 40) * scale;
+            let obX1, obY1, obX2, obY2;
+            if (ob.type === 'powerup') {
+                let radius = 10 * scale;
+                obX1 = screenX - radius;
+                obY1 = screenY - radius;
+                obX2 = screenX + radius;
+                obY2 = screenY;
+            } else {
+                obX1 = screenX - width / 2;
+                obY1 = screenY - height;
+                obX2 = obX1 + width;
+                obY2 = obY1 + height;
+            }
+            let playerX1 = CANVAS_WIDTH / 2 - 10;
+            let playerY1 = player.baseY - player.jumpHeight;
+            let playerX2 = playerX1 + 20;
+            let playerY2 = playerY1 + 20;
+            if (!(playerX2 < obX1 || playerX1 > obX2 || playerY2 < obY1 || playerY1 > obY2)) {
+                if (ob.type === 'powerup') {
+                    lives += 1;
+                    obstacles.splice(obstacles.indexOf(ob), 1);
+                    return;
+                } else {
+                    if (lives > 0) {
+                        lives -= 1;
+                        player.x = 0;
+                        player.z = 0;
+                        obstacles = [];
+                    } else {
+                        highScore = Math.max(highScore, score);
+                        losing = true;
+                        shake = 180;
+                        setTimeout(() => {
+                            gameOver = true;
+                            losing = false;
+                            shake = 0;
+                            menuButton.style.display = 'block';
+                            restartButton.style.display = 'block';
+                            handleGameOver();
+                        }, 3000);
+                    }
+                }
+            }
+        });
+
+        // Check for mid-song life
+        if (musicManager.currentSong && musicManager.currentSong.url && audioPlayer.duration && audioPlayer.currentTime > audioPlayer.duration / 2 && !midSong) {
+            lives += 1;
+            midSong = true;
+        }
+
+        lifeAngle += 0.1;
+
+        if (gameOver && !gameOverHandled) {
+            gameOverHandled = true;
+            handleGameOver();
+        }
+
+        score += 1;
+    }
+
+function handleGameOver() {
+    audioLockedUntilRestart = true;
+    if (window.innerWidth < 768) {
+        pauseBtn.style.display = 'none';
+        document.getElementById('touchControls').style.display = 'none';
+    }
+    // Stop procedural audio if any
+    if (musicManager.stopProceduralAudio) {
+        try { musicManager.stopProceduralAudio(); } catch (e) {}
+    }
+    // Stop microphone
+    if (musicManager.micStream) {
+        try {
+            musicManager.micStream.getTracks().forEach(t => t.stop());
+        } catch (e) {}
+        musicManager.micStream = null;
+    }
+    // Detune and stop current song
+    detuneAndStopAudio();
+}
+
+    function detuneAndStopAudio() {
+        if (!musicManager.currentSong || !musicManager.currentSong.url) return;
+        try { if (audioPlayer.paused) return; } catch (e) {}
+        const startRate = audioPlayer.playbackRate || 1;
+        const startVol = ('volume' in audioPlayer) ? audioPlayer.volume : 1;
+        const duration = 800; // ms
+        const start = performance.now();
+        function step(ts) {
+            const k = Math.min(1, (ts - start) / duration);
+            const rate = Math.max(0.1, startRate * (1 - k));
+            const vol = Math.max(0, startVol * (1 - k));
+            try {
+                audioPlayer.playbackRate = rate;
+                audioPlayer.volume = vol;
+            } catch (e) {}
+            if (k < 1 && !audioPlayer.paused) {
+                requestAnimationFrame(step);
+            } else {
+                try {
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                    audioPlayer.playbackRate = 1;
+                    audioPlayer.volume = 1;
+                } catch (e) {}
+                if (musicManager.audioContext && musicManager.audioContext.state === 'running') {
+                    musicManager.audioContext.suspend().catch(() => {});
+                }
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    function draw() {
+        if (!gameStarted) return;
+
+        ctx.save();
+        if (shake > 0) {
+            let offsetX = (Math.random() - 0.5) * shake;
+            let offsetY = (Math.random() - 0.5) * shake;
+            ctx.translate(offsetX, offsetY);
+        }
+        if (currentBg && currentBg.complete) {
+            ctx.drawImage(currentBg, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        } else {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        }
+        
+        if (player.beatFlash > 0) {
+            ctx.fillStyle = `rgba(0, 255, 255, ${0.1 * (player.beatFlash / 8)})`;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        }
+
+        // Draw road
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 2;
+        for (let z = 0; z < ROAD_LENGTH; z += 50) {
+            let worldZ = z + player.z - CAMERA_DISTANCE;
+            if (worldZ <= 0) continue;
+            let scale = FOCAL_LENGTH / worldZ;
+            let y = CANVAS_HEIGHT - (z / ROAD_LENGTH) * CANVAS_HEIGHT;
+            let left = CANVAS_WIDTH / 2 - (ROAD_WIDTH / 2) * scale;
+            let right = CANVAS_WIDTH / 2 + (ROAD_WIDTH / 2) * scale;
+            ctx.beginPath();
+            ctx.moveTo(left, y);
+            ctx.lineTo(right, y);
+            ctx.stroke();
+        }
+
+        // Draw obstacles
+        obstacles.forEach(ob => {
+            let worldZ = ob.z - (player.z - CAMERA_DISTANCE);
+            if (worldZ <= 0) return;
+            let scale = FOCAL_LENGTH / worldZ;
+            let screenX = CANVAS_WIDTH / 2 + (ob.x - player.x) * scale;
+            let screenY = CANVAS_HEIGHT - ((ob.z - player.z) / ROAD_LENGTH) * CANVAS_HEIGHT;
+            if (ob.type === 'powerup') {
+                let radius = 10 * scale;
+                ctx.fillStyle = ob.flash > 0 ? 'white' : ob.color;
+                ctx.shadowColor = 'green';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY - radius, radius, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            } else {
+                let width = ob.width * scale;
+                let height = (ob.baseHeight || 40) * scale;
+                ctx.fillStyle = ob.flash > 0 ? 'white' : ob.color;
+                // Future: if ob.skin is an Image, use drawImage instead of fillRect
+                ctx.fillRect(screenX - width / 2, screenY - height, width, height);
+            }
+        });
+
+        // Draw player
+        let playerY = player.baseY - player.jumpHeight;
+        let playerColor = player.beatFlash > 0 ? 'cyan' : player.color;
+
+        if (player.beatFlash > 0) {
+            ctx.shadowColor = 'cyan';
+            ctx.shadowBlur = 15;
+        }
+
+        ctx.fillStyle = playerColor;
+        ctx.fillRect(CANVAS_WIDTH / 2 - 10, playerY, 20, 20);
+        ctx.shadowBlur = 0;
+
+        // Draw lives as orbiting cubes
+        for (let i = 0; i < lives; i++) {
+            let angle = (i / Math.max(lives, 1)) * 2 * Math.PI + lifeAngle;
+            let dist = 30;
+            let x = CANVAS_WIDTH / 2 + Math.cos(angle) * dist;
+            let y = playerY + Math.sin(angle) * dist;
+            ctx.fillStyle = 'green';
+            ctx.fillRect(x - 5, y - 5, 10, 10);
+        }
+
+        // Draw life particles
+        for (let i = 0; i < lives * 5; i++) {
+            let angle = (i / Math.max(lives * 5, 1)) * 2 * Math.PI + lifeAngle * 1.5;
+            let dist = 25 + (i % 3) * 5;
+            let x = CANVAS_WIDTH / 2 + Math.cos(angle) * dist;
+            let y = playerY + Math.sin(angle) * dist;
+            ctx.fillStyle = 'rgba(0,255,154,0.5)';
+            ctx.fillRect(x - 1, y - 1, 2, 2);
+        }
+
+        // Draw UI
+        // ctx.fillStyle = 'white';
+        // ctx.font = '20px Arial';
+        // ctx.fillText('Lives: ' + lives, 10, 30);
+        // ctx.fillText('Score: ' + score, 10, 30);
+
+        // let currentSpeed = PLAYER_SPEED.toFixed(1);
+        // ctx.fillText('Speed: ' + currentSpeed, 10, 55);
+        // ctx.fillText('BPM: ' + bpm, 10, 80);
+
+        // Show song progress bar at top
+        if (musicManager.currentSong && musicManager.currentSong.url && audioPlayer.duration) {
+            let progress = audioPlayer.currentTime / audioPlayer.duration;
+            ctx.fillStyle = '#00FF9A';
+            ctx.fillRect(0, 5, CANVAS_WIDTH * progress, 10);
+            if (songFlash > 0) {
+                ctx.fillStyle = 'cyan';
+                ctx.fillRect(0, 5, CANVAS_WIDTH * progress, 10);
+            }
+        }
+
+        // Show current song info at top center
+        if (musicManager.currentSong) {
+            let songText = musicManager.currentSong.title;
+            ctx.textAlign = 'center';
+            ctx.font = '14px Bytesized';
+            if (songFlash > 0) {
+                ctx.fillStyle = 'cyan';
+                ctx.shadowColor = 'cyan';
+                ctx.shadowBlur = 10;
+                songFlash--;
+            } else {
+                ctx.fillStyle = 'white';
+                ctx.shadowBlur = 0;
+            }
+            ctx.fillText(songText, CANVAS_WIDTH / 2, 25);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'white';
+            ctx.shadowBlur = 0;
+            ctx.font = '20px Arial';
+
+            // Show score below
+            ctx.fillStyle = 'yellow';
+            ctx.font = '16px Bytesized';
+            ctx.textAlign = 'center';
+            ctx.fillText('Puntaje: ' + score, CANVAS_WIDTH / 2, 45);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+        } else {
+            ctx.textAlign = 'center';
+            ctx.font = '14px Bytesized';
+            ctx.fillStyle = 'white';
+            ctx.fillText('🎤 Micrófono', CANVAS_WIDTH / 2, 25);
+            ctx.textAlign = 'left';
+            ctx.font = '20px Arial';
+        }
+
+        if (gameOver) {
+            ctx.fillStyle = 'red';
+            ctx.font = '40px Bytesized';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+            ctx.textAlign = 'left';
+            
+            // Show next song suggestion if shuffle is on
+            if (musicManager.shuffleMode) {
+                ctx.fillStyle = 'white';
+                ctx.font = '16px Bytesized';
+                ctx.textAlign = 'center';
+                ctx.fillText('🔀 Nueva canción al reiniciar', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
+                ctx.textAlign = 'left';
+            }
+        }
+
+        // Show/hide buttons based on gameOver
+        restartButton.style.display = gameOver ? 'block' : 'none';
+        menuButton.style.display = gameOver ? 'block' : 'none';
+
+        ctx.restore();
+    }
+
+    // Global function to select and play songs
+    window.selectAndPlaySong = async function(songId, type) {
+        let song;
+        if (type === 'default') {
+            song = musicManager.defaultSongs.find(s => s.id === songId);
+        } else {
+            song = musicManager.userLibrary.find(s => s.id === songId);
+        }
+        
+        if (song) {
+            await musicManager.selectSong(song);
+            
+            // Auto-play if it has a URL
+            if (song.url) {
+                try {
+                    const playPromise = audioPlayer.play();
+                    if (playPromise && typeof playPromise.then === 'function') {
+                        await playPromise;
+                    }
+                    micStatus.textContent = `🎵 Reproduciendo: ${song.title}`;
+                    micStatus.className = 'status-granted';
+                } catch (err) {
+                    console.log('Autoplay blocked by browser:', err);
+                    micStatus.innerHTML = '<i class="fa-solid fa-play"></i> Presiona play para reproducir la canción';
+                    micStatus.className = 'status-denied';
+                }
+            }
+            
+            // Switch to play tab
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector('[data-tab="play"]').classList.add('active');
+            document.getElementById('playTab').classList.add('active');
+        }
+    };
+
+    // Auto-select next song when current ends (if shuffle is on)
+    audioPlayer.addEventListener('ended', async () => {
+        if (!gameOver) {
+            await playNextFromUserOrDefault();
+        }
+    });
+
+    // Logo animation
+    const logoCanvas = document.getElementById('logoCanvas');
+    const logoCtx = logoCanvas.getContext('2d');
+    let logoAngle = 0;
+    let logoFlash = 0;
+
+    function drawLogo() {
+        logoCtx.clearRect(0, 0, 120, 120);
+        // Draw player square with flash
+        logoCtx.shadowBlur = 0;
+        let flash = Math.sin(logoAngle * 10) > 0;
+        if (flash) {
+            logoCtx.shadowBlur = 20;
+            logoCtx.shadowColor = '#00FF9A';
+        }
+        logoCtx.fillStyle = '#00FF9A';
+        logoCtx.fillRect(45, 45, 30, 30);
+        logoCtx.shadowBlur = 0;
+        // Draw particles
+        for (let i = 0; i < 10; i++) {
+            let angle = (i / 10) * 2 * Math.PI + logoAngle;
+            let dist = 50 + (i % 3) * 5;
+            let x = 60 + Math.cos(angle) * dist;
+            let y = 60 + Math.sin(angle) * dist;
+            logoCtx.fillStyle = 'rgba(0,255,154,0.5)';
+            logoCtx.fillRect(x - 1, y - 1, 2, 2);
+        }
+        logoAngle += 0.05;
+        requestAnimationFrame(drawLogo);
+    }
+    drawLogo();
+
+    // Touch controls
+    const pauseBtn = document.getElementById('pauseBtn');
+    const touchControls = document.getElementById('touchControls');
+
+    // Hide touch controls on page load
+    touchControls.style.display = 'none';
+
+    pauseBtn.addEventListener('click', () => {
+      if (!isPaused) {
+        pauseGame();
+      } else {
+        resumeGameWithCountdown();
+      }
+    });
+
+    // Touch movement on canvas
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      if (x < CANVAS_WIDTH / 2) {
+        keys['ArrowLeft'] = true;
+      } else {
+        keys['ArrowRight'] = true;
+      }
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      keys['ArrowLeft'] = false;
+      keys['ArrowRight'] = false;
+    });
+  </script>
+</body>
+</html>
